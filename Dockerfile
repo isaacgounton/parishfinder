@@ -17,9 +17,9 @@ RUN npm run build
 # Expose the port the app runs on
 EXPOSE 3006
 
-ENV PORT 3006
-ENV HOSTNAME "0.0.0.0"
-ENV NODE_ENV production
+ENV PORT=3006
+ENV HOSTNAME="0.0.0.0"
+ENV NODE_ENV=production
 
-# Start the application
-CMD ["npm", "start"]
+# Start the application using vite preview directly
+CMD ["npx", "vite", "preview", "--host", "0.0.0.0", "--port", "3006"]
