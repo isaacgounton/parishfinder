@@ -1,5 +1,4 @@
-# Build stage
-FROM node:18-alpine as builder
+FROM node:18-alpine
 
 WORKDIR /app
 
@@ -7,34 +6,20 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm install
 
-# Copy source code
+# Copy the rest of the application
 COPY . .
 
 # Build the application
 RUN npm run build
 
-# Production stage
-FROM nginx:alpine
+# Expose the port the app runs on
+EXPOSE 3006
 
-# Remove default nginx configuration
-RUN rm /etc/nginx/conf.d/default.conf
+ENV PORT 3006
+ENV HOSTNAME "0.0.0.0"
+ENV NODE_ENV production
 
-# Copy built assets from builder stage
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Create 50x.html
-RUN echo "<!DOCTYPE html><html><head><title>Server Error</title></head><body><h1>Server Error</h1><p>Something went wrong.</p></body></html>" > /usr/share/nginx/html/50x.html
-
-# Expose port 80
-EXPOSE 80
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s CMD wget --quiet --tries=1 --spider http://localhost:80 || exit 1
-
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Start the application
+CMD ["npm", "start"]
